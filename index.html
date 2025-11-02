@@ -1,55 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Command Sender</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #response { width: 100%; height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; }
-        #commandInput { width: 80%; padding: 10px; }
-        #sendBtn { padding: 10px 20px; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Command Executor</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  #response { width: 100%; height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; }
+  input[type=text] { width: 80%; padding: 10px; }
+  button { padding: 10px 20px; }
+</style>
 </head>
 <body>
-    <h1>Send Commands to Server</h1>
-    <input type="text" id="commandInput" placeholder="Enter command" />
-    <button id="sendBtn">Send</button>
-    <h2>Response:</h2>
-    <div id="response"></div>
+<h2>Enter Command:</h2>
+<input type="text" id="commandInput" placeholder="Enter command" />
+<button onclick="sendCommand()">Send</button>
+<h3>Output:</h3>
+<div id="response"></div>
 
-    <script>
-        // Replace with your WebSocket proxy URL
-        const socket = new WebSocket('ws://192.168.68.101:12345');
-
-        const responseDiv = document.getElementById('response');
-        const commandInput = document.getElementById('commandInput');
-
-        socket.onopen = () => {
-            responseDiv.innerHTML += 'Connected to server<br>';
-        };
-
-        socket.onmessage = (event) => {
-            responseDiv.innerHTML += event.data.replace(/\n/g, '<br>') + '<br>';
-            responseDiv.scrollTop = responseDiv.scrollHeight;
-        };
-
-        socket.onerror = (error) => {
-            responseDiv.innerHTML += 'Error: ' + error.message + '<br>';
-        };
-
-        document.getElementById('sendBtn').onclick = () => {
-            const command = commandInput.value;
-            if (command.trim() !== '') {
-                socket.send(command);
-                commandInput.value = '';
-            }
-        };
-
-        // Optional: allow pressing Enter to send
-        commandInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('sendBtn').click();
-            }
-        });
-    </script>
+<script>
+  function sendCommand() {
+    const command = document.getElementById('commandInput').value;
+    fetch('/execute', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ command: command })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const responseDiv = document.getElementById('response');
+      responseDiv.innerHTML += '<pre>' + data.output + '</pre>';
+      document.getElementById('commandInput').value = '';
+    })
+    .catch(error => {
+      alert('Error: ' + error);
+    });
+  }
+</script>
 </body>
 </html>
