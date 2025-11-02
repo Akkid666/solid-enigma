@@ -1,34 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Server Command Client</title>
+    <title>Command Sender</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #response { width: 100%; height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; }
+        #commandInput { width: 80%; padding: 10px; }
+        #sendBtn { padding: 10px 20px; }
+    </style>
 </head>
 <body>
-    <h1>Send Command to Server</h1>
+    <h1>Send Commands to Server</h1>
     <input type="text" id="commandInput" placeholder="Enter command" />
-    <button onclick="sendCommand()">Send</button>
-    <pre id="output"></pre>
+    <button id="sendBtn">Send</button>
+    <h2>Response:</h2>
+    <div id="response"></div>
 
     <script>
-        // Replace ws://localhost:12345 with your server's address
-        const socket = new WebSocket('ws://localhost:12345');
+        // Replace with your WebSocket proxy URL
+        const socket = new WebSocket('ws://81.231.109.178:8080');
+
+        const responseDiv = document.getElementById('response');
+        const commandInput = document.getElementById('commandInput');
 
         socket.onopen = () => {
-            document.getElementById('output').textContent += 'Connected to server\n';
+            responseDiv.innerHTML += 'Connected to server<br>';
         };
 
         socket.onmessage = (event) => {
-            document.getElementById('output').textContent += event.data + '\n';
+            responseDiv.innerHTML += event.data.replace(/\n/g, '<br>') + '<br>';
+            responseDiv.scrollTop = responseDiv.scrollHeight;
         };
 
         socket.onerror = (error) => {
-            document.getElementById('output').textContent += 'Error: ' + error.message + '\n';
+            responseDiv.innerHTML += 'Error: ' + error.message + '<br>';
         };
 
-        function sendCommand() {
-            const command = document.getElementById('commandInput').value;
-            socket.send(command);
-        }
+        document.getElementById('sendBtn').onclick = () => {
+            const command = commandInput.value;
+            if (command.trim() !== '') {
+                socket.send(command);
+                commandInput.value = '';
+            }
+        };
+
+        // Optional: allow pressing Enter to send
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('sendBtn').click();
+            }
+        });
     </script>
 </body>
 </html>
