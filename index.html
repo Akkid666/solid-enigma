@@ -1,34 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Command Executor</title>
+    <title>Send Command to Batch Script</title>
 </head>
 <body>
-<h1>Execute Command</h1>
-<input type="text" id="command" placeholder="Enter command (e.g., dir)" />
-<button onclick="sendCommand()">Run</button>
-<pre id="output"></pre>
+    <h1>Send Command</h1>
+    <input type="text" id="commandInput" placeholder="Enter command" />
+    <button onclick="sendCommand()">Send</button>
+    <h2>Output</h2>
+    <pre id="output"></pre>
 
-<script>
-    function sendCommand() {
-        const command = document.getElementById('command').value;
-        fetch('http://localhost:5000/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain'
-            },
-            body: command
-        })
-        .then(res => res.text())
-        .then(text => {
-            document.getElementById('output').textContent = text;
-        })
-        .catch(error => {
-            document.getElementById('output').textContent = 'Error: ' + error;
-        });
-    }
-</script>
+    <script>
+        function sendCommand() {
+            const command = document.getElementById('commandInput').value;
+            fetch('http://localhost:5000/send_command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('output').textContent = data;
+            })
+            .catch(error => {
+                document.getElementById('output').textContent = 'Error: ' + error;
+            });
+        }
+    </script>
 </body>
 </html>
