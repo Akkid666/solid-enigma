@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Send Command to Batch Script</title>
+    <title>Server Command Client</title>
 </head>
 <body>
-    <h1>Send Command</h1>
+    <h1>Send Command to Server</h1>
     <input type="text" id="commandInput" placeholder="Enter command" />
     <button onclick="sendCommand()">Send</button>
-    <h2>Output</h2>
     <pre id="output"></pre>
 
     <script>
+        // Replace ws://localhost:12345 with your server's address
+        const socket = new WebSocket('ws://localhost:12345');
+
+        socket.onopen = () => {
+            document.getElementById('output').textContent += 'Connected to server\n';
+        };
+
+        socket.onmessage = (event) => {
+            document.getElementById('output').textContent += event.data + '\n';
+        };
+
+        socket.onerror = (error) => {
+            document.getElementById('output').textContent += 'Error: ' + error.message + '\n';
+        };
+
         function sendCommand() {
             const command = document.getElementById('commandInput').value;
-            fetch('http://localhost:5000/send_command', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ command: command })
-            })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('output').textContent = data;
-            })
-            .catch(error => {
-                document.getElementById('output').textContent = 'Error: ' + error;
-            });
+            socket.send(command);
         }
     </script>
 </body>
